@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundMusic = document.getElementById('background-music');
     jumpMusic = document.getElementById('jump-music');
     endMusic = document.getElementById('end-music');
-
     backgroundMusic.volume = 0.5;
 
     morcegoY = window.innerHeight / 2;
@@ -35,18 +34,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
-            if (!gameStarted) {
-                initialScreen.style.display = 'none';
-                gameStarted = true;
-                startGame();
-            } else if (deathScreen.style.display === 'flex') {
-                window.location.reload();
-            } else {
-                fly();
-            }
+            handleUserInteraction();
         }
     });
+    
+    document.addEventListener('touchstart', () => {
+        handleUserInteraction();
+    });
 });
+
+function handleUserInteraction() {
+    if (!gameStarted) {
+        initialScreen.style.display = 'none';
+        gameStarted = true;
+        startGame();
+    } else if (gameOver && deathScreen.style.display === 'flex') {
+        window.location.reload();
+    } else if (!gameOver) {
+        fly();
+    }
+}
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 20);
@@ -61,7 +68,9 @@ function gameLoop() {
     morcegoY += velocity;
     morcego.style.top = morcegoY + 'px';
 
-    if (morcegoY > window.innerHeight || morcegoY < 0) endGame();
+    if (morcegoY > window.innerHeight || morcegoY < 0) {
+        endGame();
+    }
 
     let hitboxBuffer = 10;
     let pipes = document.querySelectorAll('.pipe');
@@ -69,12 +78,10 @@ function gameLoop() {
         let pipeRect = pipe.getBoundingClientRect();
         let morcegoRect = morcego.getBoundingClientRect();
         let buffer = 5;
-        if (
-            morcegoRect.right - buffer - hitboxBuffer > pipeRect.left &&
+        if (morcegoRect.right - buffer - hitboxBuffer > pipeRect.left &&
             morcegoRect.left + buffer + hitboxBuffer < pipeRect.right &&
             ((morcegoRect.bottom - buffer - hitboxBuffer > pipeRect.top && pipe.classList.contains('bottom')) ||
-            (morcegoRect.top + buffer + hitboxBuffer < pipeRect.bottom && pipe.classList.contains('top')))
-        ) {
+            (morcegoRect.top + buffer + hitboxBuffer < pipeRect.bottom && pipe.classList.contains('top')))) {
             endGame();
         }
 
